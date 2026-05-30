@@ -22,8 +22,5 @@ class CompanyService:
 
     def get_risk_exposure(self, company_id: UUID, max_paths: int | None = None) -> CompanyRiskResponse:
         effective_limit = self._risk_max_paths if max_paths is None else max_paths
-        if effective_limit < 1 or effective_limit > 100:
-            raise ValueError("max_paths must be between 1 and 100")
-
         _ = self.get_company(company_id)
         return self._repository.get_company_risk(company_id, effective_limit)

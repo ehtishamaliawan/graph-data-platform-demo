@@ -50,6 +50,7 @@ class Neo4jCompanyRepository(CompanyRepository):
         return Company.model_validate(rows[0].data())
 
     def get_company_risk(self, company_id: UUID, max_paths: int) -> CompanyRiskResponse:
+        fetch_limit = max_paths + 1
         rows = self._client.execute_read(
             "company_risk_paths",
             """
@@ -75,14 +76,14 @@ class Neo4jCompanyRepository(CompanyRepository):
                 name: coalesce(n.name, n.email, n.domain, n.title, '')
               }] AS nodes,
               [r IN relationships(path) | {type: type(r)}] AS relationships
-            LIMIT $max_paths
+            LIMIT $limit
             """,
-            {"company_id": str(company_id), "max_paths": max_paths},
+            {"company_id": str(company_id), "limit": fetch_limit},
         )
 
         paths: list[RiskPath] = []
         total = 0.0
-        for row in rows:
+        for row in rows[:max_paths]:
             raw = row.data()
             score = float(raw["score"])
             total += score
@@ -98,6 +99,6 @@ class Neo4jCompanyRepository(CompanyRepository):
             company_id=str(company_id),
             total_score=round(total, 3),
             path_count=len(paths),
-            truncated=len(paths) >= max_paths,
+            truncated=len(rows) > max_paths,
             paths=paths,
         )

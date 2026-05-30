@@ -35,7 +35,7 @@ def test_get_company_not_found_raises(repository_mock: CompanyRepository) -> Non
         service.get_company(uuid4())
 
 
-def test_get_risk_exposure_validates_limit(repository_mock: CompanyRepository) -> None:
+def test_get_risk_exposure_uses_default_limit(repository_mock: CompanyRepository) -> None:
     company_id = uuid4()
     repository_mock.get_by_id.return_value = Company(id=company_id, name="Acme", created_at=datetime.now(UTC))
     repository_mock.get_company_risk.return_value = CompanyRiskResponse(
@@ -46,5 +46,7 @@ def test_get_risk_exposure_validates_limit(repository_mock: CompanyRepository) -
     )
     service = CompanyService(repository_mock, risk_max_paths=25)
 
-    with pytest.raises(ValueError):
-        service.get_risk_exposure(company_id, max_paths=0)
+    response = service.get_risk_exposure(company_id)
+
+    assert response.total_score == 1.0
+    repository_mock.get_company_risk.assert_called_once_with(company_id, 25)

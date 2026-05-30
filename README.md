@@ -1,56 +1,44 @@
 # Graph Data Platform Demo
 
-A production-style graph data platform built with FastAPI, Neo4j and Docker.
+Production-style graph backend using **Python 3.12**, **FastAPI**, and **Neo4j**, designed for high-signal backend interviews.
 
-This repository demonstrates graph modelling, relationship traversal, analytics APIs and backend engineering patterns commonly used in modern data platforms.
+## Key Features
 
-## Tech Stack
+- **Graph-native risk analytics**: `GET /api/v1/companies/{company_id}/risk` returns explainable paths and aggregate exposure score.
+- **Safe bounded traversals**: only bounded path shapes are used (`TARGETS`, `WORKS_FOR`, `USES`, `OWNS`), with configurable `max_paths` limit.
+- **Neo4j migrations**: idempotent startup migrations create and track UUID constraints/indexes via `(:Migration {id})` records.
+- **Clean architecture + DI**: repository and service layers are injected through FastAPI dependencies (no global service locator).
+- **FastAPI lifespan**: Neo4j driver lifecycle and migrations run during startup/shutdown.
+- **Observability**: request-id based structured request logs and minimal counters for HTTP and graph-query usage.
+- **Quality gates**: CI runs `ruff`, `mypy`, unit tests, and Neo4j-backed integration tests.
 
-- Python
-- FastAPI
-- Neo4j
-- Docker
-- Pytest
+## API
 
-## Example Graph Model
+- `GET /api/v1/health`
+- `GET /api/v1/metrics`
+- `POST /api/v1/companies`
+- `GET /api/v1/companies/{company_id}`
+- `GET /api/v1/companies/{company_id}/risk?max_paths=25`
 
-```text
-(Company)-[:OWNS]->(Domain)
-(Employee)-[:WORKS_FOR]->(Company)
-(Employee)-[:USES]->(Domain)
-(Threat)-[:TARGETS]->(Company)
-(Project)-[:BELONGS_TO]->(Company)
+## Local Run
+
+```bash
+docker compose up --build
 ```
 
-## Planned Features
+Set env vars as needed:
 
-- Graph-based entity modelling
-- Company and employee relationship mapping
-- Threat intelligence relationship analysis
-- REST APIs with FastAPI
-- Dockerised deployment
-- Swagger/OpenAPI documentation
-- Automated testing
+- `NEO4J_URI`
+- `NEO4J_USER`
+- `NEO4J_PASSWORD`
+- `NEO4J_DATABASE`
+- `RISK_MAX_PATHS`
 
-## Example Use Cases
+## Tests
 
-- Threat intelligence platforms
-- Relationship discovery systems
-- Internal data platforms
-- Knowledge graph applications
-- Graph analytics workloads
-
-## Repository Structure
-
-```text
-app/
-routes/
-services/
-tests/
-data/
-docs/
+```bash
+ruff check .
+mypy app
+pytest -q tests/unit
+RUN_INTEGRATION_TESTS=true pytest -q tests/integration
 ```
-
-## Why This Project?
-
-The goal of this repository is to demonstrate practical backend engineering, graph database modelling and API design using Python and Neo4j.

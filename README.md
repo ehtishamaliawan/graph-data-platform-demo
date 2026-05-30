@@ -20,6 +20,12 @@ Production-style graph backend using **Python 3.12**, **FastAPI**, and **Neo4j**
 - `GET /api/v1/companies/{company_id}`
 - `GET /api/v1/companies/{company_id}/risk?max_paths=25`
 
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Neo4j Schema](docs/schema.md)
+- [Risk Analysis](docs/risk-analysis.md)
+
 ## Local Run
 
 ```bash
